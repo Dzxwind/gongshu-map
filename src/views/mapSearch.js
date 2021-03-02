@@ -1,5 +1,6 @@
 import AMap from 'AMap'
-import gongshu from '@/assets/geojson/gongshu_gcj02.json'
+// import gongshu from '@/assets/geojson/gongshu_gcj02.json'
+import gongshu from '@/assets/geojson/gongshu-inner-gcj02.json'
 import generateMarker from './generateMarker'
 export default {
   data() {
@@ -50,6 +51,7 @@ export default {
             fillColor: geojson.properties.color,
             fillOpacity: 0.2,
             strokeColor: geojson.properties.color,
+            strokeWeight: 3,
             extData: geojson.properties
           })
           polygon.on('click', (e) => {
@@ -124,7 +126,7 @@ export default {
       } else {
         this.$notification.open({
           message: '区域定位',
-          description: `您点击的地点不在五个中队内！`
+          description: `您点击的地点不在区域内！`
         })
       }
     }
