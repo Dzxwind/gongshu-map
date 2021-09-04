@@ -3,7 +3,23 @@ import gongshu_wgs84 from '@/assets/geojson/gongshu.json'
 import generateMarker from './generateMarker'
 const transCoords = require('coordtransform-cli')
 const gongshu = transCoords(gongshu_wgs84, 'wgs84togcj02')
-const colorList = []
+const colorList = [
+  '#e74c3c',
+  '#e67e22',
+  '#f1c40f',
+  '#1abc9c',
+  '#2ecc71',
+  '#3498db',
+  '#9b59b6',
+  '#c0392b',
+  '#d35400',
+  '#f39c12',
+  '#16a085',
+  '#27ae60',
+  '#2980b9',
+  '#8e44ad',
+]
+const middleTeamList = [...new Set(gongshu.features.map(item => item.properties.seconedTeam))]
 export default {
   data() {
     return {
@@ -40,19 +56,20 @@ export default {
       this.polygonDistrict = new AMap.GeoJSON({
         geoJSON: gongshu,
         getPolygon: (geojson, lnglat) => {
+          const areaColor = colorList[middleTeamList.findIndex(item => item === geojson.properties.seconedTeam)]
           let labelMarker = new AMap.Marker({
             name: geojson.properties.name,
             position: geojson.properties.center,
             anchor: 'center',
-            content: `<div class="map-label" style="color: ${'#3498db'}">${geojson.properties.name}</div>`,
+            content: `<div class="map-label" style="color: ${areaColor}">${geojson.properties.name}</div>`,
           })
           this.labelMarkerList.push(labelMarker)
           this.map.add(labelMarker)
           let polygon = new AMap.Polygon({
             path: lnglat,
-            fillColor: '#3498db',
+            fillColor: areaColor,
             fillOpacity: 0.2,
-            strokeColor: '#3498db',
+            strokeColor: areaColor,
             strokeWeight: 3,
             extData: geojson.properties,
           })
