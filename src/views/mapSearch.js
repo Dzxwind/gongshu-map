@@ -1,7 +1,9 @@
 import AMap from 'AMap'
-// import gongshu from '@/assets/geojson/gongshu_gcj02.json'
-import gongshu from '@/assets/geojson/gongshu-inner-gcj02.json'
+import gongshu_wgs84 from '@/assets/geojson/gongshu.json'
 import generateMarker from './generateMarker'
+const transCoords = require('coordtransform-cli')
+const gongshu = transCoords(gongshu_wgs84, 'wgs84togcj02')
+const colorList = []
 export default {
   data() {
     return {
@@ -14,24 +16,24 @@ export default {
       resultTotal: 0,
       searchKeyWords: null,
       activeItem: null,
-      labelMarkerList: []
+      labelMarkerList: [],
     }
   },
   methods: {
     mapInit() {
-      this.map = new AMap.Map(this.$refs.mapView,{
+      this.map = new AMap.Map(this.$refs.mapView, {
         zoom: 12,
         viewMode: '3D',
       })
       this.map.on('click', (e) => {
-        console.log(e);
+        console.log(e)
       })
     },
     searchInit() {
       this.placeSearch = new AMap.PlaceSearch({
         city: '330100',
         pageSize: 10,
-        citylimit: true
+        citylimit: true,
       })
     },
     polygonInit() {
@@ -42,23 +44,23 @@ export default {
             name: geojson.properties.name,
             position: geojson.properties.center,
             anchor: 'center',
-            content: `<div class="map-label" style="color: ${geojson.properties.color}">${geojson.properties.name}</div>`,
+            content: `<div class="map-label" style="color: ${'#3498db'}">${geojson.properties.name}</div>`,
           })
           this.labelMarkerList.push(labelMarker)
           this.map.add(labelMarker)
           let polygon = new AMap.Polygon({
             path: lnglat,
-            fillColor: geojson.properties.color,
+            fillColor: '#3498db',
             fillOpacity: 0.2,
-            strokeColor: geojson.properties.color,
+            strokeColor: '#3498db',
             strokeWeight: 3,
-            extData: geojson.properties
+            extData: geojson.properties,
           })
           polygon.on('click', (e) => {
-            console.log(e);
+            console.log(e)
           })
           return polygon
-        }
+        },
       })
       this.map.add(this.polygonDistrict)
       this.map.setFitView(this.polygonDistrict.getOverlays())
@@ -76,7 +78,7 @@ export default {
         this.resultTotal = 0
         return
       }
-      this.placeSearch.search(val, (status,result) => {
+      this.placeSearch.search(val, (status, result) => {
         this.map.remove(this.resultMarkers)
         if (status === 'complete') {
           this.resultTotal = result.poiList.count
@@ -86,7 +88,7 @@ export default {
               content: generateMarker({
                 index: index + 1,
                 detail: item,
-                parent: this
+                parent: this,
               }),
               anchor: 'bottom-center',
               position: item.location,
@@ -108,7 +110,7 @@ export default {
     },
     onResultClick(item) {
       this.activeItem = item
-      const containArea = this.polygonDistrict.getOverlays().find(overlay => overlay.contains(item.location))
+      const containArea = this.polygonDistrict.getOverlays().find((overlay) => overlay.contains(item.location))
       this.openNotification(containArea)
     },
     openNotification(overlay) {
@@ -118,18 +120,30 @@ export default {
           description: (h) => {
             return (
               <span>
-                您点击的地点位于<span style={`color: ${overlay.getExtData().color}; font-weight: bold; font-size: 18px`}>{overlay.getExtData().name}！</span>
+                您点击的地点位于
+                <div style={`color: ${overlay.getExtData().color}; font-weight: bold; font-size: 18px`}>
+                  {overlay.getExtData().firstTeam}
+                </div>
+                <div style={`color: ${overlay.getExtData().color}; font-weight: bold; font-size: 18px`}>
+                  {overlay.getExtData().seconedTeam}
+                </div>
+                <div style={`color: ${overlay.getExtData().color}; font-weight: bold; font-size: 18px`}>
+                  {overlay.getExtData().defendArea}
+                </div>
+                <div style={`color: ${overlay.getExtData().color}; font-weight: bold; font-size: 18px`}>
+                  {overlay.getExtData().name}
+                </div>
               </span>
             )
-          }
+          },
         })
       } else {
         this.$notification.open({
           message: '区域定位',
-          description: `您点击的地点不在区域内！`
+          description: `您点击的地点不在区域内！`,
         })
       }
-    }
+    },
   },
   mounted() {
     this.mapInit()
